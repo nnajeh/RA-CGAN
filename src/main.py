@@ -33,3 +33,86 @@ dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle
 
 
 
+    generator.train()
+    discriminator.train()
+
+    d_losses = []
+    g_losses = []
+    for i, (real_images, labels) in enumerate(dataloader):
+        batch_size = real_images.size(0)
+        real_images = real_images.to(device)
+        labels = labels.to(device)
+
+        # Train discriminator
+        d_optimizer.zero_grad()
+
+        # Compute loss on real images
+        real_output = discriminator(real_images, labels)
+        real_loss = -torch.mean(real_output)
+
+        # Compute loss on fake images
+        z = torch.randn(batch_size, generator.z_dim, device=device)
+        y_emb = generator.shared_emb(labels)
+        fake_images = generator(z, y_emb)
+        fake_output = discriminator(fake_images.detach(), labels)
+        fake_loss = torch.mean(fake_output)
+
+        # Compute gradient penalty
+        alpha = torch.rand(batch_size, 1, 1, 1).to(device)
+        interpolated_images = alpha * real_images + (1 - alpha) * fake_images.detach()
+        interpolated_images.requires_grad_(True)
+        interpolated_output = discriminator(interpolated_images, labels)
+        grad_outputs = torch.ones_like(interpolated_output).to(device)
+        gradients = torch.autograd.grad(outputs=interpolated_output,
+                                        inputs=interpolated_images,
+                                        grad_outputs=grad_outputs,
+                                        create_graph=True,
+                                        retain_graph=True,
+                                        only_inputs=True)[0]
+        gradients = gradients.view(batch_size, -1)
+        gradient_penalty = lambda_gp * ((gradients.norm(2, dim=1) - 1) ** 2).mean()
+
+        # Update discriminator
+        train_d_loss = real_loss + fake_loss + gradient_penalty
+        train_d_loss.backward()
+        d_optimizer.step()
+
+        # Train generator
+        g_optimizer.zero_grad()
+
+        # Compute loss on fake images
+        z = torch.randn(batch_size, generator.z_dim, device=device)
+        y_emb = generator.shared_emb(labels)
+        fake_images = generator(z, y_emb)
+        fake_output = discriminator(fake_images, labels)
+        train_g_loss = -torch.mean(fake_output)
+
+        # Update generator
+        train_g_loss.backward()
+        g_optimizer.step()
+
+        d_losses.append(train_d_loss.item())
+        g_losses.append(train_g_loss.item())
+
+
+
+    d_train_loss = np.average(d_losses)
+    g_train_loss = np.average(g_losses)
+    train_total_g_losses.append(g_train_loss)
+    train_total_d_losses.append(d_train_loss)
+    epoch_len = len(str(n_epochs))
+    print(f"[{epoch:>{epoch_len}}/{n_epochs:>{epoch_len}}] "
+      f"[G_Train_Loss: {train_g_loss.item()}] "
+      f"[D_Train_Loss: {train_d_loss.item()}]"
+       )
+
+    if batches_done % sample_interval ==0:
+        save_image(fake_images.data[:25], f"./{batches_done:06}.png", nrow =5, normalize=True)
+
+    batches_done += n_critic
+    image_check(fake_images.cpu())
+
+    torch.save(discriminator.state_dict(), f"./D.pth")
+    torch.save(generator.state_dict(), f"./G.pth")
+
+

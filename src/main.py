@@ -13,6 +13,6 @@ for module in discriminator.modules():
     if (isinstance(module, nn.Conv2d) or isinstance(module, nn.Linear) or isinstance(module, nn.Embedding)):
         nn.init.orthogonal_(module.weight)
 
-# Initialize optimizers
+# Initialize optimizers: pulmonary datasets
 g_optimizer = torch.optim.Adam(generator.parameters(), lr=1e-4, betas=(0.0, 0.999), eps=1e-6)
 d_optimizer = torch.optim.Adam(discriminator.parameters(), lr=4e-4, betas=(0.0, 0.999), eps=1e-6)

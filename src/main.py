@@ -21,6 +21,8 @@ d_optimizer = torch.optim.Adam(discriminator.parameters(), lr=4e-4, betas=(0.0, 
 root = data_pat  # Replace with the actual path to your dataset
 normalize = transforms.Normalize(mean=[0, 0, 0], std=[1, 1, 1])
 
+
+# Transform of medical data (for mnist change 128 to 32)
 transform = transforms.Compose([transforms.Resize((128,128)),
                                                transforms.RandomResizedCrop((128), scale=(0.5, 1.0)),
                                                transforms.RandomHorizontalFlip(),

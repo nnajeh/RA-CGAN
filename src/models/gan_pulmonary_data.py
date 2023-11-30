@@ -118,7 +118,7 @@ class Discriminator(nn.Module):
         cond_out = torch.sum(self.shared_emb(y) * h, dim=1, keepdim=True)
         out = uncond_out + cond_out
       
-        #output a score 
+        #output a score for anomaly detection
         out = out.view(-1)
 
         return out

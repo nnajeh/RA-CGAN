@@ -1,4 +1,6 @@
-from models.gan import Generator, Discriminator
+from models.gan_pulmonary import *
+from models.gan_mnist import *
+
 
 import os
 import torch

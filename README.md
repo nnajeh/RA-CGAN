@@ -6,6 +6,6 @@ In this study, we propose a unified optimized and efficient framework for unsupe
 
 
 ## Proposed Framework
-![full-framework](https://github.com/nnajeh/f-DSC-GAN/assets/38373885/4c40298d-fd3d-4fc4-9607-3f4903bb9687)
+![Full_architecture](https://github.com/nnajeh/RA-CCGAN/assets/38373885/d5f2566d-b3bc-45c0-a72b-4f2744f41501)
 
 This is a PyTorch/GPU implementation of the paper [Unifying Class-Conditional GAN Framework for Unsupervised Pulmonary Anomalies Detection]
